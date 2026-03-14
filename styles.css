@@ -1,0 +1,573 @@
+/* =============================================
+   Timer App – Global Styles
+   ============================================= */
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface2: #16213e;
+  --accent: #e94560;
+  --accent2: #0f3460;
+  --accent3: #533483;
+  --text: #eaeaea;
+  --text-muted: #888;
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --transition: 0.25s ease;
+  --green: #2ecc71;
+  --yellow: #f39c12;
+  --blue: #3498db;
+  --purple: #9b59b6;
+  --red: #e74c3c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+}
+
+/* ── Header ── */
+header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+header p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+
+/* ── Mode Tabs ── */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  background: var(--surface);
+  padding: 6px;
+  border-radius: 50px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 50px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mode-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.35);
+}
+
+.mode-tab:hover:not(.active) {
+  color: var(--text);
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ── Section views ── */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+/* ── Countdown Display ── */
+.countdown-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0 28px;
+}
+
+.progress-ring-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 12px;
+}
+
+.progress-ring-wrap svg {
+  transform: rotate(-90deg);
+  width: 200px;
+  height: 200px;
+}
+
+.progress-ring-track {
+  fill: none;
+  stroke: var(--surface2);
+  stroke-width: 10;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke: url(#ringGradient);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdown-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.countdown-text .time {
+  font-size: 2.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+}
+
+.countdown-text .period-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Input Row ── */
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.input-row label {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.time-input {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+
+.time-input input[type="number"] {
+  width: 72px;
+  padding: 10px 8px;
+  background: var(--surface2);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: var(--transition);
+}
+
+.time-input input[type="number"]:focus {
+  border-color: var(--accent);
+}
+
+.time-input input[type="number"]::-webkit-inner-spin-button,
+.time-input input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.time-input span {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── Toggle switches ── */
+.toggles {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-item input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  background: var(--surface2);
+  border-radius: 50px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.toggle-item input:checked + .toggle-track {
+  background: var(--accent);
+}
+
+.toggle-item input:checked + .toggle-track::after {
+  left: 23px;
+  background: #fff;
+}
+
+.toggle-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.toggle-item input:checked ~ .toggle-label {
+  color: var(--text);
+}
+
+/* ── Buttons ── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(233, 69, 96, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(233, 69, 96, 0.5);
+}
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+  background: #222244;
+  color: var(--text);
+}
+
+.btn-danger {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--red);
+  border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(231, 76, 60, 0.25);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ── Status message ── */
+.status-msg {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  min-height: 22px;
+  margin-top: 16px;
+}
+
+/* ── Multi-period list ── */
+.periods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.period-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+
+.period-item.active-period {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+.period-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.period-item .period-name-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  outline: none;
+  min-width: 60px;
+}
+
+.period-item .period-name-input::placeholder {
+  color: var(--text-muted);
+}
+
+.period-time-inputs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.period-time-inputs input[type="number"] {
+  width: 52px;
+  padding: 6px 4px;
+  background: var(--bg);
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: var(--transition);
+}
+
+.period-time-inputs input[type="number"]:focus {
+  border-color: var(--accent);
+}
+
+.period-time-inputs span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-remove-period {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: var(--transition);
+}
+
+.btn-remove-period:hover {
+  color: var(--red);
+  background: rgba(231, 76, 60, 0.12);
+}
+
+.btn-add-period {
+  background: rgba(233, 69, 96, 0.1);
+  border: 2px dashed rgba(233, 69, 96, 0.35);
+  border-radius: 12px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+  margin-bottom: 20px;
+}
+
+.btn-add-period:hover {
+  background: rgba(233, 69, 96, 0.18);
+}
+
+/* ── Multi countdown display ── */
+.multi-countdown-display {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.multi-current-period {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  min-height: 20px;
+}
+
+.multi-time {
+  font-size: 4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  min-height: 72px;
+}
+
+.multi-progress-bar-wrap {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 50px;
+  margin: 10px 0 4px;
+  overflow: hidden;
+}
+
+.multi-progress-bar {
+  height: 100%;
+  border-radius: 50px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  transition: width 1s linear;
+  width: 100%;
+}
+
+.multi-period-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.period-badge {
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 50px;
+  opacity: 0.45;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.period-badge.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ── Per-period countdown badge (parallel mode) ── */
+.period-countdown {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: rgba(233, 69, 96, 0.12);
+  padding: 4px 8px;
+  border-radius: 8px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Notification flash overlay ── */
+#notify-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(233, 69, 96, 0.18);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 9999;
+}
+
+#notify-flash.flash {
+  opacity: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .card {
+    padding: 20px 16px;
+  }
+
+  header h1 {
+    font-size: 1.9rem;
+  }
+
+  .multi-time {
+    font-size: 3rem;
+  }
+
+  .countdown-text .time {
+    font-size: 2.2rem;
+  }
+
+  .progress-ring-wrap {
+    width: 170px;
+    height: 170px;
+  }
+
+  .progress-ring-wrap svg {
+    width: 170px;
+    height: 170px;
+  }
+}
