@@ -302,6 +302,10 @@ const multi = {
   cycleCount: 0,
 };
 
+function isMultiParallelMode() {
+  return document.getElementById("multi-parallel").checked;
+}
+
 function generatePeriodId() {
   return nextPeriodId++;
 }
@@ -515,29 +519,19 @@ function updateParallelCountdownSpans() {
     const cd = row.querySelector(".period-countdown");
     if (cd) {
       cd.textContent = formatTime(p.remaining);
-      cd.classList.toggle("done", p.done);
     }
   });
 }
 
 function updateBadgesParallel() {
   document.querySelectorAll(".period-badge").forEach((b, i) => {
-    if (i < multiSnapshot.length) {
-      b.classList.toggle("active", !multiSnapshot[i].done);
-    }
+    b.classList.toggle("active", i < multiSnapshot.length);
   });
 }
 
 function multiUpdateParallelDisplay() {
-  const { maxRemaining, maxTotal } = multiSnapshot.reduce(
-    (acc, p) => ({
-      maxRemaining: Math.max(acc.maxRemaining, p.remaining),
-      maxTotal: Math.max(acc.maxTotal, p.total),
-    }),
-    { maxRemaining: 0, maxTotal: 0 }
-  );
-  document.getElementById("multi-display").textContent = formatTime(maxRemaining);
-  const fraction = maxTotal > 0 ? maxRemaining / maxTotal : 0;
+  document.getElementById("multi-display").textContent = formatTime(multi.remaining);
+  const fraction = multi.currentTotal > 0 ? multi.remaining / multi.currentTotal : 0;
   document.getElementById("multi-progress-bar").style.width = `${fraction * 100}%`;
   const { running, paused } = multi;
   document.getElementById("multi-start-btn").disabled = running && !paused;
@@ -548,39 +542,39 @@ function multiUpdateParallelDisplay() {
 function multiParallelTick() {
   const sound = document.getElementById("multi-sound").checked;
   const loop = document.getElementById("multi-loop").checked;
+  multi.remaining = Math.max(multi.remaining - 1, 0);
 
   multiSnapshot.forEach((p, i) => {
-    if (p.done) return;
-    p.remaining--;
+    p.remaining = Math.max(p.remaining - 1, 0);
     if (p.remaining <= 0) {
-      p.remaining = 0;
-      p.done = true;
       if (sound) playSound(PERIOD_SOUNDS[i % PERIOD_SOUNDS.length]);
       flashNotify(PERIOD_COLORS[p.colorIndex] + "44");
+      p.completedRuns++;
+      p.remaining = multi.remaining > 0 ? p.total : 0;
     }
   });
 
-  updateParallelCountdownSpans();
-  multiUpdateParallelDisplay();
-
-  if (multiSnapshot.every((p) => p.done)) {
+  if (multi.remaining <= 0) {
     multi.cycleCount++;
     if (loop) {
       multiSetStatus(`Cycle ${multi.cycleCount} complete – looping…`);
+      multi.remaining = multi.currentTotal;
       multiSnapshot.forEach((p) => {
         p.remaining = p.total;
-        p.done = false;
+        p.completedRuns = 0;
       });
       updateParallelCountdownSpans();
-      renderBadges();
+      multiUpdateParallelDisplay();
       updateBadgesParallel();
     } else {
       multiSetStatus(`✅ All periods complete! (${multi.cycleCount} cycle${multi.cycleCount > 1 ? "s" : ""})`);
       multiStop();
     }
-  } else {
-    updateBadgesParallel();
+    return;
   }
+
+  updateParallelCountdownSpans();
+  multiUpdateParallelDisplay();
 }
 
 function multiLoadPeriod(snapshot, index) {
@@ -593,7 +587,7 @@ function multiLoadPeriod(snapshot, index) {
 }
 
 function multiStart() {
-  const isParallel = document.getElementById("multi-parallel").checked;
+  const isParallel = isMultiParallelMode();
 
   // Resume from pause
   if (multi.paused) {
@@ -623,12 +617,14 @@ function multiStart() {
   renderBadges(); // re-render with current names
 
   if (isParallel) {
-    // Initialise per-period remaining
+    const overallTotal = multiSnapshot.reduce((max, p) => Math.max(max, periodDuration(p)), 0);
+    multi.remaining = overallTotal;
+    multi.currentTotal = overallTotal;
     multiSnapshot.forEach((p) => {
       const total = periodDuration(p);
       p.remaining = total;
       p.total = total;
-      p.done = false;
+      p.completedRuns = 0;
     });
     multi.currentIndex = -1;
     document.getElementById("multi-current-label").textContent = "Running in parallel";
@@ -651,7 +647,7 @@ function multiPause() {
   multi.paused = true;
   multi.running = false;
   multiSetStatus("Timer paused.");
-  const isParallel = document.getElementById("multi-parallel").checked;
+  const isParallel = isMultiParallelMode();
   if (isParallel) {
     multiUpdateParallelDisplay();
   } else {

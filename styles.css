@@ -528,12 +528,6 @@ header p {
   flex-shrink: 0;
 }
 
-.period-countdown.done {
-  color: var(--text-muted);
-  background: transparent;
-  text-decoration: line-through;
-}
-
 /* ── Notification flash overlay ── */
 #notify-flash {
   position: fixed;

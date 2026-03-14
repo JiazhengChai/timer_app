@@ -21,6 +21,7 @@ A browser-based countdown timer with sound notifications. No build tools or depe
 - Each period has its own colour and a **distinct synthesised notification sound**
 - Active period is highlighted with a colour-coded progress bar and badge
 - **Loop all** toggle — cycles through all periods repeatedly
+- **Parallel** toggle — runs all periods at once; shorter periods automatically restart within the same overall cycle until the longest period finishes
 - **Sound** toggle — applies globally across all periods
 
 ![Multi-Period Timer](https://github.com/user-attachments/assets/30cd50d7-d67d-4539-b406-a79ace8580b7)
