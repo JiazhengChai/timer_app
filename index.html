@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⏱ Timer App</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Flash overlay for notifications -->
+    <div id="notify-flash"></div>
+
+    <header>
+      <h1>⏱ Timer App</h1>
+      <p>Countdown timers with sound notifications</p>
+    </header>
+
+    <!-- Mode selector -->
+    <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+      <button
+        class="mode-tab active"
+        id="tab-simple"
+        role="tab"
+        aria-selected="true"
+        aria-controls="view-simple"
+        onclick="switchMode('simple')"
+      >
+        Simple Timer
+      </button>
+      <button
+        class="mode-tab"
+        id="tab-multi"
+        role="tab"
+        aria-selected="false"
+        aria-controls="view-multi"
+        onclick="switchMode('multi')"
+      >
+        Multi-Period
+      </button>
+    </div>
+
+    <!-- ════════════════════════════════════
+         SIMPLE TIMER
+    ════════════════════════════════════ -->
+    <div class="card" id="view-simple" role="tabpanel" aria-labelledby="tab-simple">
+      <!-- Circular progress + countdown -->
+      <div class="countdown-wrap">
+        <div class="progress-ring-wrap" aria-live="polite" aria-atomic="true">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#e94560" />
+                <stop offset="100%" stop-color="#533483" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-track" cx="100" cy="100" r="88" />
+            <circle
+              class="progress-ring-fill"
+              id="simple-ring"
+              cx="100"
+              cy="100"
+              r="88"
+              stroke-dasharray="553"
+              stroke-dashoffset="0"
+            />
+          </svg>
+          <div class="countdown-text">
+            <div class="time" id="simple-display">00:00</div>
+            <div class="period-label" id="simple-state-label">Ready</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duration input -->
+      <div class="input-row">
+        <label for="simple-minutes">Duration:</label>
+        <div class="time-input">
+          <input
+            type="number"
+            id="simple-minutes"
+            min="0"
+            max="99"
+            value="0"
+            placeholder="0"
+            aria-label="Minutes"
+          />
+          <span>min</span>
+          <input
+            type="number"
+            id="simple-seconds"
+            min="0"
+            max="59"
+            value="30"
+            placeholder="30"
+            aria-label="Seconds"
+          />
+          <span>sec</span>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="toggles">
+        <label class="toggle-item">
+          <input type="checkbox" id="simple-loop" />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">🔁 Loop</span>
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="simple-sound" checked />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">🔔 Sound</span>
+        </label>
+      </div>
+
+      <!-- Controls -->
+      <div class="btn-row">
+        <button class="btn btn-primary" id="simple-start-btn" onclick="simpleStart()">
+          ▶ Start
+        </button>
+        <button class="btn btn-secondary" id="simple-pause-btn" onclick="simplePause()" disabled>
+          ⏸ Pause
+        </button>
+        <button class="btn btn-secondary" id="simple-reset-btn" onclick="simpleReset()">
+          ↺ Reset
+        </button>
+      </div>
+
+      <p class="status-msg" id="simple-status" aria-live="polite"></p>
+    </div>
+
+    <!-- ════════════════════════════════════
+         MULTI-PERIOD TIMER
+    ════════════════════════════════════ -->
+    <div class="card view" id="view-multi" role="tabpanel" aria-labelledby="tab-multi">
+      <!-- Big countdown display -->
+      <div class="multi-countdown-display">
+        <div class="multi-current-period" id="multi-current-label">—</div>
+        <div class="multi-time" id="multi-display" aria-live="polite" aria-atomic="true">
+          00:00
+        </div>
+        <div class="multi-progress-bar-wrap">
+          <div class="multi-progress-bar" id="multi-progress-bar"></div>
+        </div>
+        <div class="multi-period-badges" id="multi-badges"></div>
+      </div>
+
+      <!-- Period list -->
+      <div class="periods-list" id="periods-list"></div>
+
+      <button class="btn-add-period" onclick="addPeriod()">+ Add Period</button>
+
+      <!-- Options -->
+      <div class="toggles">
+        <label class="toggle-item">
+          <input type="checkbox" id="multi-loop" />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">🔁 Loop all</span>
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="multi-sound" checked />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">🔔 Sound</span>
+        </label>
+      </div>
+
+      <!-- Controls -->
+      <div class="btn-row">
+        <button class="btn btn-primary" id="multi-start-btn" onclick="multiStart()">
+          ▶ Start
+        </button>
+        <button
+          class="btn btn-secondary"
+          id="multi-pause-btn"
+          onclick="multiPause()"
+          disabled
+        >
+          ⏸ Pause
+        </button>
+        <button class="btn btn-secondary" id="multi-reset-btn" onclick="multiReset()">
+          ↺ Reset
+        </button>
+      </div>
+
+      <p class="status-msg" id="multi-status" aria-live="polite"></p>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
