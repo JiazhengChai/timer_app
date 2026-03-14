@@ -51,10 +51,28 @@ python3 -m http.server 8080
 
 ---
 
+## GitHub Pages Deployment
+
+This repository is configured to deploy automatically to GitHub Pages from the `main` branch with GitHub Actions.
+
+- Workflow file: `.github/workflows/deploy-pages.yml`
+- Published URL: `https://jiazhengchai.github.io/timer_app/`
+- Static-site handling: `.nojekyll` is included so GitHub Pages serves the app files directly
+
+### One-time GitHub setting
+
+In the repository on GitHub, go to **Settings -> Pages** and set **Source** to **GitHub Actions**.
+
+After that, every push to `main` will redeploy the site automatically.
+
+---
+
 ## File Structure
 
 ```
 timer_app/
+├── .github/workflows/deploy-pages.yml   # GitHub Pages deployment workflow
+├── .nojekyll                            # Disables Jekyll processing on Pages
 ├── index.html   # App markup and layout
 ├── styles.css   # Dark-theme styles, animations, responsive layout
 └── app.js       # Timer logic, Web Audio API sound generation
