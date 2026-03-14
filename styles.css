@@ -512,6 +512,28 @@ header p {
   transform: scale(1.1);
 }
 
+/* ── Per-period countdown badge (parallel mode) ── */
+.period-countdown {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: rgba(233, 69, 96, 0.12);
+  padding: 4px 8px;
+  border-radius: 8px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.period-countdown.done {
+  color: var(--text-muted);
+  background: transparent;
+  text-decoration: line-through;
+}
+
 /* ── Notification flash overlay ── */
 #notify-flash {
   position: fixed;

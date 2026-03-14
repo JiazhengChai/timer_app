@@ -189,31 +189,30 @@ function simpleSetLabel(label) {
 }
 
 function simpleTick() {
-  if (simple.remaining <= 0) {
-    // Time's up
-    const loop = document.getElementById("simple-loop").checked;
-    const sound = document.getElementById("simple-sound").checked;
-
-    if (sound) playSound(0);
-    flashNotify();
-    simple.loopCount++;
-    simpleSetLabel("🔔 Done!");
-    simpleSetStatus(
-      loop
-        ? `Lap ${simple.loopCount} complete – looping…`
-        : `⏱ Timer finished! (${simple.loopCount} lap${simple.loopCount > 1 ? "s" : ""})`
-    );
-
-    if (loop) {
-      simple.remaining = simple.total;
-    } else {
-      simpleStop();
-      return;
-    }
-  }
-
-  simpleUpdateUI();
   simple.remaining--;
+  simpleUpdateUI();
+
+  if (simple.remaining > 0) return;
+
+  // Time's up
+  const loop = document.getElementById("simple-loop").checked;
+  const sound = document.getElementById("simple-sound").checked;
+
+  if (sound) playSound(0);
+  flashNotify();
+  simple.loopCount++;
+  simpleSetLabel("🔔 Done!");
+  simpleSetStatus(
+    loop
+      ? `Lap ${simple.loopCount} complete – looping…`
+      : `⏱ Timer finished! (${simple.loopCount} lap${simple.loopCount > 1 ? "s" : ""})`
+  );
+
+  if (loop) {
+    simple.remaining = simple.total;
+  } else {
+    simpleStop();
+  }
 }
 
 function simpleStart() {
@@ -285,6 +284,10 @@ function simpleReset() {
 const PERIOD_COLORS = ["#e94560", "#f39c12", "#2ecc71", "#3498db", "#9b59b6", "#1abc9c"];
 // Sound variant assigned to each period by index (cycles: warm chime, deep gong, ascending sweep, two-tone alert, bell ding)
 const PERIOD_SOUNDS = [1, 2, 3, 4, 0];
+
+function periodDuration(p) {
+  return clamp(p.minutes, 0, 99) * 60 + clamp(p.seconds, 0, 59);
+}
 
 let periods = []; // { id, name, minutes, seconds, colorIndex }
 let nextPeriodId = 0;
@@ -453,47 +456,136 @@ function multiHighlightPeriod(index, snapshot) {
 let multiSnapshot = []; // frozen copy of periods at start
 
 function multiTick() {
-  if (multi.remaining <= 0) {
-    const snapshot = multiSnapshot;
-    const sound = document.getElementById("multi-sound").checked;
-    const loop = document.getElementById("multi-loop").checked;
-    const current = snapshot[multi.currentIndex];
-
-    // Play sound for this period
-    if (sound) {
-      const variant = PERIOD_SOUNDS[multi.currentIndex % PERIOD_SOUNDS.length];
-      playSound(variant);
-    }
-    flashNotify(PERIOD_COLORS[current.colorIndex] + "44");
-
-    const nextIndex = multi.currentIndex + 1;
-
-    if (nextIndex >= snapshot.length) {
-      // All periods done
-      multi.cycleCount++;
-      if (loop) {
-        multiSetStatus(`Cycle ${multi.cycleCount} complete – looping…`);
-        multi.currentIndex = 0;
-        multiLoadPeriod(snapshot, 0);
-      } else {
-        multiSetStatus(`✅ All periods complete! (${multi.cycleCount} cycle${multi.cycleCount > 1 ? "s" : ""})`);
-        multiStop();
-        return;
-      }
-    } else {
-      multi.currentIndex = nextIndex;
-      multiLoadPeriod(snapshot, nextIndex);
-    }
-    return;
-  }
-
   multi.remaining--;
   multiUpdateDisplay();
+
+  if (multi.remaining > 0) return;
+
+  const snapshot = multiSnapshot;
+  const sound = document.getElementById("multi-sound").checked;
+  const loop = document.getElementById("multi-loop").checked;
+  const current = snapshot[multi.currentIndex];
+
+  // Play sound for this period
+  if (sound) {
+    const variant = PERIOD_SOUNDS[multi.currentIndex % PERIOD_SOUNDS.length];
+    playSound(variant);
+  }
+  flashNotify(PERIOD_COLORS[current.colorIndex] + "44");
+
+  const nextIndex = multi.currentIndex + 1;
+
+  if (nextIndex >= snapshot.length) {
+    // All periods done
+    multi.cycleCount++;
+    if (loop) {
+      multiSetStatus(`Cycle ${multi.cycleCount} complete – looping…`);
+      multi.currentIndex = 0;
+      multiLoadPeriod(snapshot, 0);
+    } else {
+      multiSetStatus(`✅ All periods complete! (${multi.cycleCount} cycle${multi.cycleCount > 1 ? "s" : ""})`);
+      multiStop();
+    }
+  } else {
+    multi.currentIndex = nextIndex;
+    multiLoadPeriod(snapshot, nextIndex);
+  }
+}
+
+/* ── Parallel mode ── */
+
+function initParallelCountdowns() {
+  multiSnapshot.forEach((p) => {
+    const row = document.querySelector(`.period-item[data-id="${p.id}"]`);
+    if (!row) return;
+    const existing = row.querySelector(".period-countdown");
+    if (existing) existing.remove();
+    const cd = document.createElement("span");
+    cd.className = "period-countdown";
+    cd.textContent = formatTime(p.remaining);
+    const removeBtn = row.querySelector(".btn-remove-period");
+    row.insertBefore(cd, removeBtn);
+  });
+}
+
+function updateParallelCountdownSpans() {
+  multiSnapshot.forEach((p) => {
+    const row = document.querySelector(`.period-item[data-id="${p.id}"]`);
+    if (!row) return;
+    const cd = row.querySelector(".period-countdown");
+    if (cd) {
+      cd.textContent = formatTime(p.remaining);
+      cd.classList.toggle("done", p.done);
+    }
+  });
+}
+
+function updateBadgesParallel() {
+  document.querySelectorAll(".period-badge").forEach((b, i) => {
+    if (i < multiSnapshot.length) {
+      b.classList.toggle("active", !multiSnapshot[i].done);
+    }
+  });
+}
+
+function multiUpdateParallelDisplay() {
+  const { maxRemaining, maxTotal } = multiSnapshot.reduce(
+    (acc, p) => ({
+      maxRemaining: Math.max(acc.maxRemaining, p.remaining),
+      maxTotal: Math.max(acc.maxTotal, p.total),
+    }),
+    { maxRemaining: 0, maxTotal: 0 }
+  );
+  document.getElementById("multi-display").textContent = formatTime(maxRemaining);
+  const fraction = maxTotal > 0 ? maxRemaining / maxTotal : 0;
+  document.getElementById("multi-progress-bar").style.width = `${fraction * 100}%`;
+  const { running, paused } = multi;
+  document.getElementById("multi-start-btn").disabled = running && !paused;
+  document.getElementById("multi-start-btn").textContent = paused ? "▶ Resume" : "▶ Start";
+  document.getElementById("multi-pause-btn").disabled = !running || paused;
+}
+
+function multiParallelTick() {
+  const sound = document.getElementById("multi-sound").checked;
+  const loop = document.getElementById("multi-loop").checked;
+
+  multiSnapshot.forEach((p, i) => {
+    if (p.done) return;
+    p.remaining--;
+    if (p.remaining <= 0) {
+      p.remaining = 0;
+      p.done = true;
+      if (sound) playSound(PERIOD_SOUNDS[i % PERIOD_SOUNDS.length]);
+      flashNotify(PERIOD_COLORS[p.colorIndex] + "44");
+    }
+  });
+
+  updateParallelCountdownSpans();
+  multiUpdateParallelDisplay();
+
+  if (multiSnapshot.every((p) => p.done)) {
+    multi.cycleCount++;
+    if (loop) {
+      multiSetStatus(`Cycle ${multi.cycleCount} complete – looping…`);
+      multiSnapshot.forEach((p) => {
+        p.remaining = p.total;
+        p.done = false;
+      });
+      updateParallelCountdownSpans();
+      renderBadges();
+      updateBadgesParallel();
+    } else {
+      multiSetStatus(`✅ All periods complete! (${multi.cycleCount} cycle${multi.cycleCount > 1 ? "s" : ""})`);
+      multiStop();
+    }
+  } else {
+    updateBadgesParallel();
+  }
 }
 
 function multiLoadPeriod(snapshot, index) {
   const p = snapshot[index];
-  const totalSecs = clamp(p.minutes, 0, 99) * 60 + clamp(p.seconds, 0, 59);
+  const totalSecs = periodDuration(p);
   multi.remaining = totalSecs;
   multi.currentTotal = totalSecs;
   multiHighlightPeriod(index, snapshot);
@@ -501,12 +593,18 @@ function multiLoadPeriod(snapshot, index) {
 }
 
 function multiStart() {
-  // Resume
+  const isParallel = document.getElementById("multi-parallel").checked;
+
+  // Resume from pause
   if (multi.paused) {
     multi.paused = false;
     multi.running = true;
-    multi.intervalId = setInterval(multiTick, 1000);
-    multiUpdateDisplay();
+    multi.intervalId = setInterval(isParallel ? multiParallelTick : multiTick, 1000);
+    if (isParallel) {
+      multiUpdateParallelDisplay();
+    } else {
+      multiUpdateDisplay();
+    }
     return;
   }
 
@@ -519,14 +617,32 @@ function multiStart() {
 
   multi.running = true;
   multi.paused = false;
-  multi.currentIndex = 0;
   multi.cycleCount = 0;
   multiSetStatus("");
 
   renderBadges(); // re-render with current names
-  multiLoadPeriod(multiSnapshot, 0);
 
-  multi.intervalId = setInterval(multiTick, 1000);
+  if (isParallel) {
+    // Initialise per-period remaining
+    multiSnapshot.forEach((p) => {
+      const total = periodDuration(p);
+      p.remaining = total;
+      p.total = total;
+      p.done = false;
+    });
+    multi.currentIndex = -1;
+    document.getElementById("multi-current-label").textContent = "Running in parallel";
+    document.getElementById("multi-progress-bar").style.background =
+      "linear-gradient(90deg, var(--accent), var(--purple))";
+    initParallelCountdowns();
+    multiUpdateParallelDisplay();
+    updateBadgesParallel();
+    multi.intervalId = setInterval(multiParallelTick, 1000);
+  } else {
+    multi.currentIndex = 0;
+    multiLoadPeriod(multiSnapshot, 0);
+    multi.intervalId = setInterval(multiTick, 1000);
+  }
 }
 
 function multiPause() {
@@ -535,13 +651,19 @@ function multiPause() {
   multi.paused = true;
   multi.running = false;
   multiSetStatus("Timer paused.");
-  multiUpdateDisplay();
+  const isParallel = document.getElementById("multi-parallel").checked;
+  if (isParallel) {
+    multiUpdateParallelDisplay();
+  } else {
+    multiUpdateDisplay();
+  }
 }
 
 function multiStop() {
   clearInterval(multi.intervalId);
   multi.running = false;
   multi.paused = false;
+  document.querySelectorAll(".period-countdown").forEach((el) => el.remove());
   multiUpdateDisplay();
   document.getElementById("multi-start-btn").textContent = "▶ Start";
   document.getElementById("multi-start-btn").disabled = false;
