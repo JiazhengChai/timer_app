@@ -692,7 +692,7 @@ function multiReset() {
   // Seed multi-period with three defaults
   addPeriod("Short", 0, 15);
   addPeriod("Medium", 0, 30);
-  addPeriod("Long", 1, 0);
+  addPeriod("Long", 8, 0);
 
   // Ensure simple view is shown
   switchMode("simple");
